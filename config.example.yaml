@@ -1,0 +1,32 @@
+bark:
+  url: "https://api.day.app/your_token_here"  # 替换为你的 Bark 推送地址
+
+logging:
+  file: "logs/reader.log"
+
+split:
+  chars_per_segment: 300
+
+reading:
+  speed_cps: 4.5        # 字/秒，中文正常语速约270字/分钟
+  buffer_seconds: 2.0   # 每段朗读完毕后的额外缓冲秒数
+
+cleaner:
+  ad_keywords:
+    - "长按关注"
+    - "点击阅读原文"
+    - "阅读原文"
+    - "扫码关注"
+    - "扫一扫"
+    - "转发给朋友"
+    - "分享到朋友圈"
+    - "广告"
+    - "推广"
+    - "赞赏"
+    - "喜欢作者"
+    - "发现更多精彩"
+    - "责任编辑"
+    - "版权所有"
+    - "查看全文"
+    - "展开全文"
+    - "收起全文"
