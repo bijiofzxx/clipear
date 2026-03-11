@@ -9,7 +9,7 @@
 ```
 Windows 复制文章文字
        ↓
-  Alt+Shift+S
+  Ctrl+Shift+S
        ↓
 清洗文本（去图片/链接/广告词等）
        ↓
@@ -23,7 +23,7 @@ iOS「朗读通知」功能自动朗读 🎧
 - **文本清洗**：自动去除图片占位符、裸 URL、Markdown 标记、广告推广语句、全角空格等噪音
 - **智能分段**：按句号边界切割，每段约 300 字，避免通知被 iOS 截断
 - **动态间隔**：根据每段字数估算朗读时长，朗读完毕后再发下一段，保证顺序
-- **随时中断**：按 `Alt+Shift+E` 立即停止当前文章的推送
+- **随时中断**：按 `Ctrl+Shift+E` 立即停止当前文章的推送
 
 ---
 
@@ -92,8 +92,8 @@ python iphone_reader.py
 
 ```
 2026-03-10 10:00:00 [INFO] clipear 启动
-2026-03-10 10:00:00 [INFO] 操作说明：复制文章文字后按 ALT+SHIFT+S 开始朗读，按 ALT+SHIFT+E 停止
-2026-03-10 10:00:00 [INFO] 热键已注册 — 开始：ALT+SHIFT+S　结束：ALT+SHIFT+E
+2026-03-10 10:00:00 [INFO] 操作说明：复制文章文字后按 Ctrl+SHIFT+S 开始朗读，按 Ctrl+SHIFT+E 停止
+2026-03-10 10:00:00 [INFO] 热键已注册 — 开始：Ctrl+SHIFT+S　结束：Ctrl+SHIFT+E
 ```
 
 ---
@@ -103,9 +103,9 @@ python iphone_reader.py
 | 步骤 | 操作 |
 |------|------|
 | ① | 在浏览器 / 微信 / 读书 App 中，**全选并复制**文章正文 |
-| ② | 按 **`Alt+Shift+S`** 触发推送 |
+| ② | 按 **`Ctrl+Shift+S`** 触发推送 |
 | ③ | iPhone 收到通知，AirPods 自动开始朗读 🎧 |
-| ④ | 中途想停止，按 **`Alt+Shift+E`** 即可 |
+| ④ | 中途想停止，按 **`Ctrl+Shift+E`** 即可 |
 
 > **提示**：复制前不需要做任何清理，程序会自动去除图片、链接、广告等内容。
 
@@ -156,7 +156,7 @@ clipear/
 ├── splitter.py           # 按句子边界分段
 ├── notifier.py           # Bark 推送封装（含重试）
 ├── scheduler.py          # 分段发送调度，动态 sleep，支持中断
-├── hotkey.py             # 全局热键注册（Alt+Shift+S / E）
+├── hotkey.py             # 全局热键注册（Ctrl+Shift+S / E）
 ├── clipboard.py          # 剪贴板读取
 ├── logger.py             # 日志初始化（屏幕+文件按天滚动）
 ├── requirements.txt

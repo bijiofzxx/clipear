@@ -1,77 +1,53 @@
-"""Bark 推送模块：封装 HTTP 请求，含重试逻辑。"""
+"""Email 通知模块"""
 
-from __future__ import annotations
 
+import smtplib
 import logging
-import time
-
-import requests
-
-logger = logging.getLogger("reader")
-
-_MAX_RETRIES = 3
-_RETRY_DELAY = 2  # 秒
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
-def push(
-    bark_url: str,
-    title: str,
-    body: str,
-    *,
-    retries: int = _MAX_RETRIES,
-) -> bool:
-    """
-    发送 Bark 推送通知。
-
-    Args:
-        bark_url: Bark 设备推送地址，如 https://api.day.app/token
-        title:    通知标题
-        body:     通知正文
-        retries:  失败重试次数
-
-    Returns:
-        True 表示推送成功，False 表示全部重试失败。
-    """
-    url = bark_url.rstrip("/")
-    payload = {"title": title, "body": body, "sound": "minuet"}
-
-    for attempt in range(1, retries + 1):
+class Notifier:
+    """多渠道通知"""
+    
+    def __init__(self, config, logger=None):
+        self.config = config
+        self.logger = logger if logger else logging.getLogger(__name__)
+    
+    def send(self, subject: str, content: str):
+        """发送邮件"""
         try:
-            resp = requests.post(url, json=payload, timeout=10)
-            resp.raise_for_status()
-            data = resp.json()
-            if data.get("code") == 200:
-                logger.debug("Bark 推送成功：%s", title)
-                return True
-            logger.warning("Bark 返回非200：%s", data)
-        except requests.RequestException as exc:
-            logger.warning("Bark 推送失败（第%d次）：%s", attempt, exc)
-            if attempt < retries:
-                time.sleep(_RETRY_DELAY)
-
-    logger.error("Bark 推送彻底失败，已重试 %d 次：%s", retries, title)
-    return False
-
-
-# ── 语义化快捷函数 ────────────────────────────────────────────────────────────
-
-def push_invalid_clipboard(bark_url: str) -> bool:
-    return push(bark_url, "⚠️ AIRPODS_监控", "剪贴板非网址无法获取并朗读")
-
-
-def push_fetch_error(bark_url: str, reason: str, url: str) -> bool:
-    body = f"错误原因：{reason}\nURL：{url}"
-    return push(bark_url, "❌ 获取文章失败", body)
-
-
-def push_wechat_blocked(bark_url: str) -> bool:
-    return push(bark_url, "⚠️ 微信公众号", "公众号文章无法自动获取，请手动复制文字后使用")
-
-
-def push_segment(bark_url: str, title: str, body: str, index: int, total: int) -> bool:
-    segment_title = f"📖 {title} [{index}/{total}]"
-    return push(bark_url, segment_title, body)
-
-
-def push_interrupted(bark_url: str) -> bool:
-    return push(bark_url, "⏹ 已中断朗读", "当前文章朗读任务已停止")
+            email_config = dict(sender=self.config.sender,
+                                smtp_server=self.config.smtp_server,
+                                smtp_port=self.config.smtp_port,
+                                password=self.config.password,
+                                receivers=self.config.receivers)
+            
+            msg = MIMEMultipart()
+            msg['From'] = email_config['sender']
+            msg['To'] = ', '.join(email_config['receivers'])
+            msg['Subject'] = subject
+            
+            # HTML格式
+            html_content = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+                <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">
+{content}
+                </pre>
+            </body>
+            </html>
+            """
+            
+            msg.attach(MIMEText(html_content, 'html', 'utf-8'))
+            # 发送
+            with smtplib.SMTP_SSL(
+                email_config['smtp_server'], 
+                email_config['smtp_port'], timeout=10) as server:
+                server.login(email_config['sender'], email_config['password'])
+                server.send_message(msg)
+            
+            self.logger.info(f"✓ 邮件已发送: {subject}")
+            
+        except Exception as e:
+            self.logger.error(f"发送邮件失败: {e}")
