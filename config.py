@@ -38,13 +38,23 @@ class CleanerConfig:
 
 
 @dataclass
+class EmailConfig:
+    smtp_server: str
+    smtp_port: int
+    sender: str
+    password: str
+    receivers: list[str] = field(default_factory=list)
+
+
+@dataclass
 class AppConfig:
+    name: str
     bark: BarkConfig
     logging: LoggingConfig
     split: SplitConfig
     reading: ReadingConfig
     cleaner: CleanerConfig
-
+    email: EmailConfig
 
 def load_config(path: Path = CONFIG_PATH) -> AppConfig:
     """从 YAML 文件加载配置，缺失必填项时抛出 ValueError。"""
@@ -52,10 +62,12 @@ def load_config(path: Path = CONFIG_PATH) -> AppConfig:
         raw = yaml.safe_load(f)
 
     bark_url = raw.get("bark", {}).get("url", "")
+    email = raw.get("email", dict())
     if not bark_url or "your_token" in bark_url:
         raise ValueError("请在 config.yaml 中设置有效的 bark.url")
 
     return AppConfig(
+        name=raw.get('name'),
         bark=BarkConfig(url=bark_url),
         logging=LoggingConfig(
             file=raw.get("logging", {}).get("file", "logs/reader.log")
@@ -70,4 +82,7 @@ def load_config(path: Path = CONFIG_PATH) -> AppConfig:
         cleaner=CleanerConfig(
             ad_keywords=raw.get("cleaner", {}).get("ad_keywords", [])
         ),
+        email=EmailConfig(smtp_port=email.get('smtp_port', 993), sender=email.get('sender'),
+                          smtp_server=email.get('smtp_server'),
+                          password=email.get('password'), receivers=email.get('receivers', []))
     )

@@ -2,8 +2,8 @@
 hotkey.py — 全局热键监听模块
 
 热键职责：
-  Alt+Shift+S → 开始：触发新的朗读任务
-  Alt+Shift+E → 结束：中断当前朗读任务
+  Ctrl+Shift+S → 开始：触发新的朗读任务
+  Ctrl+Shift+E → 结束：中断当前朗读任务
 """
 
 from __future__ import annotations
@@ -16,8 +16,8 @@ import keyboard
 
 logger = logging.getLogger("reader")
 
-HOTKEY_START = "alt+shift+s"
-HOTKEY_END   = "alt+shift+e"
+HOTKEY_START = "ctrl+shift+s"
+HOTKEY_END   = "ctrl+shift+e"
 
 
 class HotkeyManager:

@@ -5,8 +5,8 @@ iphone_reader.py — 主入口
   python iphone_reader.py
 
 操作说明：
-  Alt+Shift+S  先复制文章文字，再按此键 → 清洗分段推送到 iPhone 朗读
-  Alt+Shift+E  中断当前朗读任务
+  Ctrl+Shift+S  先复制文章文字，再按此键 → 清洗分段推送到 iPhone 朗读
+  Ctrl+Shift+E  中断当前朗读任务
   Ctrl+C       退出程序
 """
 
@@ -24,7 +24,7 @@ from clipboard import get_clipboard_text, is_empty
 from cleaner import clean
 from splitter import split_text
 from scheduler import send_segments
-from notifier import push, push_interrupted
+from notifier import Notifier
 
 
 def run_task(config: AppConfig, hotkey_mgr: HotkeyManager) -> None:
@@ -42,7 +42,7 @@ def run_task(config: AppConfig, hotkey_mgr: HotkeyManager) -> None:
 
     if is_empty(text):
         logger.warning("剪贴板为空，推送提示")
-        push(config.bark.url, "⚠️ AIRPODS_监控", "剪贴板为空，请先复制文章内容")
+        Notifier(config.email, logger=logger).send(f"{config.name}告警", "剪贴板为空，请先复制文章内容")
         return
 
     logger.info("读取剪贴板成功，原始字数：%d", len(text))
@@ -53,7 +53,7 @@ def run_task(config: AppConfig, hotkey_mgr: HotkeyManager) -> None:
 
     if is_empty(cleaned):
         logger.warning("清洗后文本为空")
-        push(config.bark.url, "⚠️ AIRPODS_监控", "清洗后内容为空，请检查复制的文本")
+        Notifier(config.email, logger=logger).send(f"{config.name}告警", "清洗后内容为空，请检查复制的文本")
         return
 
     # ── 3. 分段 ──────────────────────────────────────────────────────────────
@@ -78,8 +78,8 @@ def main() -> None:
         sys.exit(1)
 
     logger = setup_logger(config.logging.file)
-    logger.info("iphone_reader 启动")
-    logger.info("操作说明：复制文章文字后按 ALT+SHIFT+S 开始朗读，按 ALT+SHIFT+E 停止")
+    logger.info(f"iphone_reader 启动")
+    logger.info("操作说明：复制文章文字后按 CTRL+SHIFT+S 开始朗读，按 CTRL+SHIFT+E 停止")
 
     # ── 热键注册 ─────────────────────────────────────────────────────────────
     _task_lock = threading.Lock()
