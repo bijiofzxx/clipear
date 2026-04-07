@@ -67,6 +67,8 @@ def send_segments(
             notify("朗读任务被中断", f"已发送 {idx - 1}/{total} 段", level=NotifyLevel.WARNING)
 
             return
+        if idx == total:
+            segment += "。最后一段已朗读结束。"
         Notifier(config.email, logger=logger).send(f"{title},第{idx}段", segment)
         total_len += len(segment)
         # 计算本段朗读估算时长，供下一轮 sleep 使用
